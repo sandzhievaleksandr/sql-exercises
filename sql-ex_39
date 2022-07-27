@@ -5,7 +5,7 @@
 WITH nb AS
   (SELECT o.ship ,
           o.result ,
-          LEAD(o.result) OVER(PARTITION BY ship
+          LEAD(o.result) OVER(PARTITION BY o.ship
                               ORDER BY b.date) AS next_battle_data
    FROM outcomes AS o
    LEFT JOIN battles AS b ON o.battle = b.name)
