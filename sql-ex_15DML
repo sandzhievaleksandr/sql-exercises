@@ -1,0 +1,11 @@
+/*
+    From each group of the PC with identical number of model in PC table, delete all rows except for row with the greatest code for this group (code column)
+*/
+
+DELETE FROM PC
+WHERE code IN (SELECT code
+               FROM (SELECT model,
+                         code,
+                         MAX(code) OVER(PARTITION BY model) AS max_code
+                     FROM PC) AS t
+               WHERE code != max_code)
