@@ -1,0 +1,44 @@
+/*
+    Потопить в следующем сражении суда, которые в первой своей битве были повреждены и больше не участвовали ни в каких сражениях. 
+    Если следующего сражения для такого судна не существует в базе данных, не вносить его в таблицу Outcomes. 
+    Замечание: в базе данных нет двух сражений, которые состоялись бы в один день.
+    
+    Mark as sunk in next battle, the ships that were damaged on their first battle and did not participate in any other battles. 
+    If there is no following battle for such a ship in the database, do not insert the ship into the Outcomes table.
+    Assume that no more than one battle happened on a given day
+
+*/
+
+WITH t AS
+  (SELECT o.ship,
+       o.battle,
+       o.result,
+       LEAD(o.result) OVER(PARTITION BY o.ship
+                           ORDER BY b.date) AS next_battle_result,
+       DENSE_RANK() OVER(ORDER BY b.date) AS battle_rank,
+       ROW_NUMBER() OVER(PARTITION BY o.ship ORDER BY b.date) AS ships_battle_rank
+   FROM Outcomes AS o
+   LEFT JOIN battles AS b
+       ON o.battle = b.name),
+
+nb AS
+   (SELECT distinct t1.battle_rank AS battle_rank, 
+        t1.battle,
+        t2.battle_rank AS next_battle_rank,
+        t2.battle as next_battle
+    FROM t as t1
+    LEFT JOIN t as t2
+        ON t1.battle_rank + 1 = t2.battle_rank)
+
+INSERT INTO Outcomes
+SELECT ship,
+    next_battle,
+    'sunk'
+FROM t
+LEFT JOIN nb
+    ON t.battle_rank = nb.battle_rank
+WHERE 1 = 1
+    AND result = 'damaged'
+    AND next_battle_result IS NULL
+    AND next_battle IS NOT NULL
+    AND ships_battle_rank = 1
