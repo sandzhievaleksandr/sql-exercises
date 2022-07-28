@@ -1,0 +1,24 @@
+WITH funds_in_monthes AS
+    (SELECT EXTRACT(MONTH FROM fr.funded_at) AS month,
+         COUNT(DISTINCT f.name) AS funds_count
+     FROM investment AS i
+     LEFT JOIN funding_round AS fr ON i.funding_round_id = fr.id
+     LEFT JOIN fund AS f ON i.fund_id = f.id
+     WHERE EXTRACT(YEAR FROM fr.funded_at) BETWEEN 2010 AND 2013 AND f.country_code = 'USA'
+     GROUP BY EXTRACT(MONTH FROM fr.funded_at)),
+
+acquisition_by_month AS
+    (SELECT EXTRACT(MONTH FROM acquired_at) AS month,
+         COUNT(acquired_company_id) AS acquired_company_count,
+         SUM(price_amount) AS price_amount 
+     FROM acquisition
+     WHERE EXTRACT(YEAR FROM acquired_at) BETWEEN 2010 AND 2013
+     GROUP BY EXTRACT(MONTH FROM acquired_at))
+     
+SELECT fm.month,
+    fm.funds_count,
+    am.acquired_company_count,
+    am.price_amount
+FROM acquisition_by_month AS am
+JOIN funds_in_monthes AS fm ON am.month = fm.month
+ORDER BY fm.month
