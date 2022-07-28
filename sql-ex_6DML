@@ -1,0 +1,14 @@
+/*
+    Delete from the Laptop table all the laptops of those makers who don't produce printers.
+*/
+
+DELETE FROM Laptop
+WHERE model IN
+   (SELECT l.model
+    FROM Laptop AS l
+    LEFT JOIN Product as p
+        ON l.model = p.model
+    WHERE p.maker NOT IN (SELECT maker
+                                FROM Product
+                                WHERE type = 'Printer')
+    )
