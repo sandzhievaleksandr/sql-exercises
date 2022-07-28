@@ -13,4 +13,4 @@ WITH nb AS
 SELECT DISTINCT ship
 FROM nb
 WHERE result = 'damaged'
-  AND next_battle_data IS NOT NULL
+  AND next_battle_result IS NOT NULL
