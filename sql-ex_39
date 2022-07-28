@@ -6,8 +6,8 @@ WITH nb AS
   (SELECT o.ship ,
           o.result ,
           LEAD(o.result) OVER(PARTITION BY o.ship
-                              ORDER BY b.date) AS next_battle_data
-   FROM outcomes AS o
+                              ORDER BY b.date) AS next_battle_result
+   FROM Outcomes AS o
    LEFT JOIN battles AS b ON o.battle = b.name)
 
 SELECT DISTINCT ship
